@@ -1,0 +1,26 @@
+.gemini-logger-stars {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 4px 0;
+}
+
+.gemini-logger-star {
+  font-size: 20px;
+  color: #555;
+  cursor: pointer;
+  transition: color 0.15s, transform 0.15s;
+  user-select: none;
+}
+
+.gemini-logger-star:hover {
+  transform: scale(1.2);
+}
+
+.gemini-logger-star.hover {
+  color: #ffd700;
+}
+
+.gemini-logger-star.active {
+  color: #ffd700;
+}
