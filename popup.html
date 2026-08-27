@@ -1,89 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini Chat Logger</title>
   <style>
     body {
-      width: 320px;
+      font-family: 'Segoe UI', sans-serif;
+      width: 360px;
       padding: 16px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #1a1a2e;
-      color: #e0e0e0;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      margin: 0;
     }
 
     h1 {
-      margin: 0 0 12px 0;
       font-size: 16px;
-      color: #8ab4f8;
+      margin-bottom: 12px;
+      color: #cba6f7;
       text-align: center;
     }
 
     .stats {
-      background: #16213e;
+      background: #313244;
       border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 12px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
     }
 
     .stats p {
       margin: 4px 0;
-      font-size: 13px;
     }
 
     .stats span {
-      color: #8ab4f8;
       font-weight: bold;
+      color: #a6e3a1;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     button {
-      width: 100%;
-      padding: 10px;
-      margin: 4px 0;
+      padding: 8px 12px;
       border: none;
       border-radius: 6px;
-      cursor: pointer;
       font-size: 13px;
-      font-weight: 500;
-      transition: background 0.2s;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s;
     }
 
-    .btn-export {
-      background: #0f3460;
-      color: #fff;
+    button:hover {
+      opacity: 0.85;
     }
 
-    .btn-export:hover {
-      background: #1a508b;
+    #previewCsv {
+      background: #89dceb;
+      color: #1e1e2e;
+      font-weight: 600;
     }
 
-    .btn-clear {
-      background: #e94560;
-      color: #fff;
+    #exportCsv {
+      background: #89b4fa;
+      color: #1e1e2e;
+      font-weight: 600;
     }
 
-    .btn-clear:hover {
-      background: #c73550;
+    #exportJson {
+      background: #a6e3a1;
+      color: #1e1e2e;
+      font-weight: 600;
     }
 
-    .status {
-      text-align: center;
+    #clearLogs {
+      background: #f38ba8;
+      color: #1e1e2e;
+      font-weight: 600;
+    }
+
+    #status {
+      margin-top: 10px;
       font-size: 12px;
-      margin-top: 8px;
-      color: #4ecca3;
+      color: #a6e3a1;
       min-height: 16px;
+      text-align: center;
+    }
+
+    /* CSV Preview Panel */
+    #csvPreviewContainer {
+      display: none;
+      margin-top: 14px;
+    }
+
+    #csvPreviewContainer.visible {
+      display: block;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .preview-header span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #cba6f7;
+    }
+
+    #closePreview {
+      background: #45475a;
+      color: #cdd6f4;
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 4px;
+    }
+
+    #csvPreviewScroll {
+      max-height: 280px;
+      overflow: auto;
+      border-radius: 6px;
+      border: 1px solid #45475a;
+    }
+
+    #csvPreviewTable {
+      border-collapse: collapse;
+      font-size: 11px;
+      width: 100%;
+      min-width: 600px;
+    }
+
+    #csvPreviewTable th {
+      background: #313244;
+      color: #cba6f7;
+      padding: 6px 8px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+      white-space: nowrap;
+      border-bottom: 1px solid #45475a;
+    }
+
+    #csvPreviewTable td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #313244;
+      vertical-align: top;
+      max-width: 180px;
+      word-break: break-word;
+    }
+
+    #csvPreviewTable tr:nth-child(even) td {
+      background: #1e1e2e;
+    }
+
+    #csvPreviewTable tr:nth-child(odd) td {
+      background: #181825;
+    }
+
+    #noLogsMsg {
+      font-size: 12px;
+      color: #f38ba8;
+      text-align: center;
+      padding: 10px;
     }
   </style>
 </head>
 <body>
   <h1>Gemini Chat Logger</h1>
+
   <div class="stats">
     <p>Total Entries: <span id="count">0</span></p>
     <p>Rated Entries: <span id="rated">0</span></p>
   </div>
-  <button class="btn-export" id="exportCsv">Export as CSV</button>
-  <button class="btn-export" id="exportJson">Export as JSON</button>
-  <button class="btn-clear" id="clearLogs">Clear Logs</button>
-  <div class="status" id="status"></div>
+
+  <div class="actions">
+    <button id="previewCsv">👁 Preview CSV</button>
+    <button id="exportCsv">⬇ Export as CSV</button>
+    <button id="exportJson">⬇ Export as JSON</button>
+    <button id="clearLogs">🗑 Clear Logs</button>
+  </div>
+
+  <div id="status"></div>
+
+  <!-- CSV Preview Panel -->
+  <div id="csvPreviewContainer">
+    <div class="preview-header">
+      <span>CSV Preview</span>
+      <button id="closePreview">✕ Close</button>
+    </div>
+    <div id="csvPreviewScroll">
+      <table id="csvPreviewTable">
+        <thead id="csvPreviewHead"></thead>
+        <tbody id="csvPreviewBody"></tbody>
+      </table>
+      <div id="noLogsMsg" style="display:none;">No logs to display.</div>
+    </div>
+  </div>
 
   <script src="popup.js"></script>
 </body>
